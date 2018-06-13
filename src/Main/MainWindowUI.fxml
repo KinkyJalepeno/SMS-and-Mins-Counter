@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="827.0"
+            prefWidth="397.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Main.MainWindowController">
+    <children>
+        <Pane prefHeight="827.0" prefWidth="397.0" style="-fx-background-color: #808080;">
+            <children>
+                <Pane layoutX="8.0" layoutY="10.0" prefHeight="116.0" prefWidth="380.0"
+                      style="-fx-border-color: black; -fx-background-color: #A9A9A9;">
+                    <children>
+                        <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#chooseFile"
+                                prefHeight="25.0" prefWidth="61.0" text="Browse"/>
+                        <Button layoutX="14.0" layoutY="50.0" mnemonicParsing="false" onAction="#parseFile"
+                                prefHeight="25.0" prefWidth="61.0" text="Parse"/>
+                        <TextField fx:id="filePath" layoutX="86.0" layoutY="14.0" prefHeight="25.0" prefWidth="282.0"/>
+                        <Label layoutX="14.0" layoutY="85.0" prefHeight="17.0" prefWidth="99.0" text="Records Parsed:">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                        </Label>
+                        <Label fx:id="recordsParsed" layoutX="118.0" layoutY="85.0" prefHeight="17.0" prefWidth="51.0"
+                               text="90000"/>
+                        <Label layoutX="208.0" layoutY="85.0" prefHeight="17.0" prefWidth="120.0"
+                               text="Total Minutes Used:">
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                        </Label>
+                        <Label fx:id="totalMins" layoutX="333.0" layoutY="85.0" prefHeight="17.0" prefWidth="51.0"
+                               text="90000"/>
+                    </children>
+                </Pane>
+                <TextArea layoutX="8.0" layoutY="131.0" prefHeight="691.0" prefWidth="380.0"
+                          style="-fx-border-color: Black; -fx-control-inner-background: #A9A9A9; -fx-highlight-fill: #A9A9A9; -fx-text-fill: #000000; -fx-background-color: #A9A9A9;"/>
+            </children>
+        </Pane>
+    </children>
+</AnchorPane>
