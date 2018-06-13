@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Hypermedia CDR Tool.iml" filepath="$PROJECT_DIR$/Hypermedia CDR Tool.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Hypermedia SMS Counter.iml" filepath="$PROJECT_DIR$/Hypermedia SMS Counter.iml" />
     </modules>
   </component>
 </project>
