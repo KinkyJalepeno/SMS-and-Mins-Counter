@@ -2,7 +2,6 @@ package Main;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 
@@ -15,25 +14,11 @@ public class MainWindowController {
     private String filePath;
 
     @FXML
-    private TextArea textArea;
-    @FXML
     private TextField filePathLabel;
     @FXML
     private Label recordsParsed;
     @FXML
     private Label totalMins;
-
-//    @Override
-//    public void initialize(URL location, ResourceBundle resources) {
-//
-//        DatabaseOperation operation = null;
-//        try {
-//            operation = new DatabaseOperation();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        operation.flushDatabase();
-//    }
 
     @FXML
     private void browseToFile() {
@@ -54,14 +39,20 @@ public class MainWindowController {
     @FXML
     private void parseFile() throws SQLException, IOException {
 
-        textArea.clear();
-
         DatabaseOperation operation = new DatabaseOperation(filePath);
         operation.parseFileIntoDB();
 
         int count = operation.getCount();
         recordsParsed.setText(String.valueOf(count));
+
+        retrieveMinutesUsed();
+
     }
 
+    private void retrieveMinutesUsed() throws SQLException {
 
+        DatabaseOperation operation = new DatabaseOperation();
+
+        operation.sendDBQueries();
+    }
 }

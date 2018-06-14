@@ -11,6 +11,7 @@ public class DatabaseOperation {
     private Connection conn;
     private Statement stmt;
     private PreparedStatement ps;
+    private ResultSet rs;
 
     private FileReader reader;
     private BufferedReader txtIn;
@@ -18,7 +19,8 @@ public class DatabaseOperation {
     private String url;
     private String line;
 
-    private int count = 0;
+    private int recordsCount = 0;
+    private int totalSmsSent = 0;
 
     public DatabaseOperation(String filePath) throws SQLException, FileNotFoundException {
 
@@ -29,6 +31,14 @@ public class DatabaseOperation {
         conn = DriverManager.getConnection(url);
         stmt = conn.createStatement();
         ps = conn.prepareStatement("insert into sends (card, port, position, length) values (?,?,?,?)");
+    }
+
+    public DatabaseOperation() throws SQLException {
+
+        url = "jdbc:sqlite:C://sqlite/SMSLog.db";
+        conn = DriverManager.getConnection(url);
+        stmt = conn.createStatement();
+
     }
 
     public void flushDatabase() {
@@ -53,7 +63,7 @@ public class DatabaseOperation {
 
             line = tmp;
 
-            count++;
+            recordsCount++;
 
             String errorArray[] = line.split("[|]");
 
@@ -91,6 +101,33 @@ public class DatabaseOperation {
 
     public int getCount() {
 
-        return count;
+        return recordsCount;
+    }
+
+    public void sendDBQueries() throws SQLException {
+
+        int card = 21, port = 1, position = 1, smsCount = 0;
+
+        String sqlCommand = "select length from sends where card = '" + card + "' and port = '" +
+                port + "' and position = '" + position + "';";
+
+        System.out.println("sqlCommand = " + sqlCommand);
+
+        rs = stmt.executeQuery(sqlCommand);
+
+        while (rs.next()) {
+
+            String smsSent = rs.getString(1);
+            smsCount += Integer.parseInt(smsSent);
+        }
+        totalSmsSent += smsCount;
+        System.out.println("smsCount = " + smsCount);
+
+        sendPortTotalToUI(smsCount);
+    }
+
+    private void sendPortTotalToUI(int smsCount) {
+
+
     }
 }
