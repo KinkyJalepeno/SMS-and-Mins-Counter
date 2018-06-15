@@ -20,6 +20,7 @@ public class DatabaseOperation {
     private String line;
 
     private int recordsCount = 0;
+    private int portCount = 0;
     private int totalSmsSent = 0;
 
     public DatabaseOperation(String filePath) throws SQLException, FileNotFoundException {
@@ -30,7 +31,7 @@ public class DatabaseOperation {
         url = "jdbc:sqlite:C://sqlite/SMSLog.db";
         conn = DriverManager.getConnection(url);
         stmt = conn.createStatement();
-        ps = conn.prepareStatement("insert into sends (card, port, position, length) values (?,?,?,?)");
+        ps = conn.prepareStatement("insert into sends (card, port, result, length, position) values (?,?,?,?,?)");
     }
 
     public DatabaseOperation() throws SQLException {
@@ -41,20 +42,9 @@ public class DatabaseOperation {
 
     }
 
-    public void flushDatabase() {
-
-        String sqlCommand = "DELETE FROM sends;";
-        try {
-            stmt.executeQuery(sqlCommand);
-        } catch (SQLException e) {
-
-        }
-
-    }
-
     public void parseFileIntoDB() throws SQLException, IOException {
 
-        flushDatabase();
+        initDatabase();
 
         String tmp = txtIn.readLine();
         conn.setAutoCommit(false);
@@ -69,19 +59,62 @@ public class DatabaseOperation {
 
             String card = (errorArray[1]);
             String port = (errorArray[2]);
-            String simPosition = (errorArray[11].substring(4, 5));
-            String smsLength = (errorArray[14]);
+            String result = (errorArray[5]);
+            String smsLength = (errorArray[11].substring(4, 5));
+            String simPosition = (errorArray[14]);
 
-            ps.setInt(1, Integer.parseInt(card));
-            ps.setInt(2, Integer.parseInt(port));
-            ps.setInt(3, Integer.parseInt(simPosition));
-            ps.setInt(4, Integer.parseInt(smsLength));
-            ps.addBatch();
+            checkForKeyword(card, port, result, smsLength, simPosition);
 
             tmp = txtIn.readLine();
         }
 
         executeBatchAndClose();
+
+    }
+
+    public void initDatabase() throws SQLException {
+
+        conn.setAutoCommit(false);
+
+        try {
+            String sqlCommand = "delete from sends;";
+            stmt.executeQuery(sqlCommand);
+        } catch (SQLException e) {
+
+        }
+
+        for (int card = 21; card <= 28; card++) {
+
+            for (int port = 1; port <= 4; port++) {
+
+                for (int pos = 1; pos <= 4; pos++) {
+
+                    //String sqlCommand = "insert into sends values ('" + card + "','" + port + "','Nill','0','" + pos + "');";
+                    ps.setInt(1, (card));
+                    ps.setInt(2, (port));
+                    ps.setString(3, ("Dave"));
+                    ps.setInt(4, (0));
+                    ps.setInt(5, (pos));
+                    ps.addBatch();
+                }
+            }
+        }
+        ps.executeBatch();
+        conn.commit();
+        System.out.println("Finished");
+    }
+
+    private void checkForKeyword(String card, String port, String result, String smsLength, String simPosition) throws SQLException {
+
+        if (result.contains("confirmation")) {
+            return;
+        }
+        ps.setInt(1, Integer.parseInt(card));
+        ps.setInt(2, Integer.parseInt(port));
+        ps.setString(3, (result));
+        ps.setInt(4, Integer.parseInt(smsLength));
+        ps.setInt(5, Integer.parseInt(simPosition));
+        ps.addBatch();
 
     }
 
@@ -104,30 +137,38 @@ public class DatabaseOperation {
         return recordsCount;
     }
 
-    public void sendDBQueries() throws SQLException {
+    public void sendDBQueries() {
 
-        int card = 21, port = 1, position = 1, smsCount = 0;
+        for (int card = 21; card <= 28; card++) {
 
-        String sqlCommand = "select length from sends where card = '" + card + "' and port = '" +
-                port + "' and position = '" + position + "';";
+            for (int port = 1; port <= 4; port++) {
 
-        System.out.println("sqlCommand = " + sqlCommand);
+                for (int pos = 1; pos <= 4; pos++) {
 
-        rs = stmt.executeQuery(sqlCommand);
+                    String sqlCommand = "select sum(length) from sends where card = '" + card + "' and port = '" +
+                            port + "' and position = '" + pos + "';";
 
-        while (rs.next()) {
-
-            String smsSent = rs.getString(1);
-            smsCount += Integer.parseInt(smsSent);
+                    //System.out.println("sqlCommand = " + sqlCommand);
+                    //sendPositionTotalToUI(sqlCommand);
+                }
+            }
         }
-        totalSmsSent += smsCount;
-        System.out.println("smsCount = " + smsCount);
-
-        sendPortTotalToUI(smsCount);
     }
 
-    private void sendPortTotalToUI(int smsCount) {
+    private void sendPositionTotalToUI(String sqlCommand) throws SQLException {
+
+        boolean isEmpty = true;
+
+        rs = stmt.executeQuery(sqlCommand);
+        while (rs.next()) {
+            isEmpty = false;
+
+            portCount = +Integer.parseInt(rs.getString(1));
+            totalSmsSent += portCount;
+        }
+        portCount = +0;
 
 
+        System.out.println("smsCount = " + portCount + " / " + totalSmsSent);
     }
 }

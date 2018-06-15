@@ -2,6 +2,7 @@ package Main;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 
@@ -19,6 +20,22 @@ public class MainWindowController {
     private Label recordsParsed;
     @FXML
     private Label totalMins;
+    @FXML
+    private TextArea area1;
+    @FXML
+    private TextArea area2;
+    @FXML
+    private TextArea area3;
+    @FXML
+    private TextArea area4;
+    @FXML
+    private TextArea area5;
+    @FXML
+    private TextArea area6;
+    @FXML
+    private TextArea area7;
+    @FXML
+    private TextArea area8;
 
     @FXML
     private void browseToFile() {
@@ -51,8 +68,9 @@ public class MainWindowController {
 
     private void retrieveMinutesUsed() throws SQLException {
 
+        TextArea[] areas = {area1, area2, area3, area4, area5, area6, area7, area8};
+
         DatabaseOperation operation = new DatabaseOperation();
 
-        operation.sendDBQueries();
     }
 }
