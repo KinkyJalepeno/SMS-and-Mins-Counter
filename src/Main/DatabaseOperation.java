@@ -30,6 +30,7 @@ public class DatabaseOperation {
 
         url = "jdbc:sqlite:C://sqlite/SMSLog.db";
         conn = DriverManager.getConnection(url);
+        conn.setAutoCommit(false);
         stmt = conn.createStatement();
         ps = conn.prepareStatement("insert into sends (card, port, result, length, position) values (?,?,?,?,?)");
     }
@@ -38,6 +39,7 @@ public class DatabaseOperation {
 
         url = "jdbc:sqlite:C://sqlite/SMSLog.db";
         conn = DriverManager.getConnection(url);
+        conn.setAutoCommit(false);
         stmt = conn.createStatement();
 
     }
@@ -47,7 +49,6 @@ public class DatabaseOperation {
         initDatabase();
 
         String tmp = txtIn.readLine();
-        conn.setAutoCommit(false);
 
         while (tmp != null) {
 
@@ -68,8 +69,9 @@ public class DatabaseOperation {
             tmp = txtIn.readLine();
         }
 
-        executeBatchAndClose();
+        executeBatch();
 
+        //sendDBQueries();
     }
 
     public void initDatabase() throws SQLException {
@@ -104,31 +106,23 @@ public class DatabaseOperation {
         System.out.println("Finished");
     }
 
-    private void checkForKeyword(String card, String port, String result, String smsLength, String simPosition) throws SQLException {
+    private void checkForKeyword(String card, String port, String result, String smsLength, String pos) throws SQLException {
 
         if (result.contains("confirmation")) {
             return;
         }
-        ps.setInt(1, Integer.parseInt(card));
-        ps.setInt(2, Integer.parseInt(port));
-        ps.setString(3, (result));
-        ps.setInt(4, Integer.parseInt(smsLength));
-        ps.setInt(5, Integer.parseInt(simPosition));
-        ps.addBatch();
+        String sqlCommand = "INSERT INTO sends VALUES ('" + card + "','" + port + "','" + result + "','" + smsLength +
+                "','" + pos + "');";
+        //System.out.println("sqlCommand = " + sqlCommand);
+        stmt.addBatch(sqlCommand);
 
     }
 
-    private void executeBatchAndClose() throws SQLException, IOException {
+    private void executeBatch() throws SQLException {
 
-        ps.executeBatch();
+        stmt.executeBatch();
         conn.commit();
-
-        ps.close();
-        reader.close();
-        txtIn.close();
-        //conn.close();
-
-        System.out.println("Job done !!!");
+        System.out.println("Batch write to db complete !!!");
 
     }
 
@@ -137,38 +131,12 @@ public class DatabaseOperation {
         return recordsCount;
     }
 
-    public void sendDBQueries() {
+    public int sendDBQueries(String sqlCommand) throws SQLException {
 
-        for (int card = 21; card <= 28; card++) {
-
-            for (int port = 1; port <= 4; port++) {
-
-                for (int pos = 1; pos <= 4; pos++) {
-
-                    String sqlCommand = "select sum(length) from sends where card = '" + card + "' and port = '" +
-                            port + "' and position = '" + pos + "';";
-
-                    //System.out.println("sqlCommand = " + sqlCommand);
-                    //sendPositionTotalToUI(sqlCommand);
-                }
-            }
-        }
-    }
-
-    private void sendPositionTotalToUI(String sqlCommand) throws SQLException {
-
-        boolean isEmpty = true;
 
         rs = stmt.executeQuery(sqlCommand);
-        while (rs.next()) {
-            isEmpty = false;
+        int results = rs.getInt(1);
 
-            portCount = +Integer.parseInt(rs.getString(1));
-            totalSmsSent += portCount;
-        }
-        portCount = +0;
-
-
-        System.out.println("smsCount = " + portCount + " / " + totalSmsSent);
+        return results;
     }
 }
