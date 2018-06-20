@@ -81,11 +81,8 @@ public class MainWindowController {
             }
         }
         totalSmsSentLabel.setText(String.valueOf(totalSmsSent));
-        try {
-            operation.closeConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        operation.closeConnection();
 
     }
 }
