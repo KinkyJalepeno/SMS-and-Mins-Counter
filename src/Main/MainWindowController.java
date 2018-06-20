@@ -49,14 +49,16 @@ public class MainWindowController {
         int count = operation.getCount();
         recordsParsed.setText(String.valueOf(count));
 
-        retrieveMinutesUsed();
+        retrieveSMSUsed();
     }
 
-    private void retrieveMinutesUsed() throws SQLException {
+    private void retrieveSMSUsed() throws SQLException {
 
         DatabaseOperation operation = new DatabaseOperation();
+        area1.clear();
 
         int results;
+        String simID;
 
         for (int card = 21; card <= 28; card++) {
 
@@ -66,17 +68,24 @@ public class MainWindowController {
 
                 for (int pos = 1; pos <= 4; pos++) {
 
-                    String sqlCommand = "SELECT SUM(length) FROM sends WHERE card = '" + card + "' AND port = '" +
+                    String sqlCommand = "SELECT scid, SUM(length) FROM sends WHERE card = '" + card + "' AND port = '" +
                             port + "' AND position = '" + pos + "';";
 
                     results = operation.sendDBQueries(sqlCommand);
+                    simID = operation.sendDBQueries2(sqlCommand);
 
                     totalSmsSent += results;
-                    area1.appendText(card + " / " + port + " / " + pos + " - [count = " + results + "]\n");
-
+                    area1.appendText(card + " / " + port + " / " + pos + " - [count = " + results +
+                            "]        \t[SCID: " + simID + "]\n");
                 }
             }
         }
         totalSmsSentLabel.setText(String.valueOf(totalSmsSent));
+        try {
+            operation.closeConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

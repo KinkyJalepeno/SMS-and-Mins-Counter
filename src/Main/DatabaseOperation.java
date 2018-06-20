@@ -20,8 +20,6 @@ public class DatabaseOperation {
     private String line;
 
     private int recordsCount = 0;
-    private int portCount = 0;
-    private int totalSmsSent = 0;
 
     public DatabaseOperation(String filePath) throws SQLException, FileNotFoundException {
 
@@ -32,7 +30,7 @@ public class DatabaseOperation {
         conn = DriverManager.getConnection(url);
         conn.setAutoCommit(false);
         stmt = conn.createStatement();
-        ps = conn.prepareStatement("insert into sends (card, port, result, length, position) values (?,?,?,?,?)");
+        ps = conn.prepareStatement("insert into sends (card, port, result, length, scid, position) values (?,?,?,?,?,?)");
     }
 
     public DatabaseOperation() throws SQLException {
@@ -61,59 +59,35 @@ public class DatabaseOperation {
             String card = (errorArray[1]);
             String port = (errorArray[2]);
             String result = (errorArray[5]);
-            String smsLength = (errorArray[11].substring(4, 5));
+            String smsLength = (errorArray[11].substring(4));
+            String scid = errorArray[13];
             String simPosition = (errorArray[14]);
 
-            checkForKeyword(card, port, result, smsLength, simPosition);
+            checkForKeyword(card, port, result, smsLength, scid, simPosition);
 
             tmp = txtIn.readLine();
         }
-
         executeBatch();
-
-        //sendDBQueries();
     }
 
-    public void initDatabase() throws SQLException {
+    public void initDatabase() {
 
-        conn.setAutoCommit(false);
-
+        String sqlCommand = "DELETE FROM sends;";
         try {
-            String sqlCommand = "delete from sends;";
             stmt.executeQuery(sqlCommand);
         } catch (SQLException e) {
 
         }
-
-        for (int card = 21; card <= 28; card++) {
-
-            for (int port = 1; port <= 4; port++) {
-
-                for (int pos = 1; pos <= 4; pos++) {
-
-                    //String sqlCommand = "insert into sends values ('" + card + "','" + port + "','Nill','0','" + pos + "');";
-                    ps.setInt(1, (card));
-                    ps.setInt(2, (port));
-                    ps.setString(3, ("Dave"));
-                    ps.setInt(4, (0));
-                    ps.setInt(5, (pos));
-                    ps.addBatch();
-                }
-            }
-        }
-        ps.executeBatch();
-        conn.commit();
-        System.out.println("Finished");
     }
 
-    private void checkForKeyword(String card, String port, String result, String smsLength, String pos) throws SQLException {
+    private void checkForKeyword(String card, String port, String result, String smsLength, String scid, String simPosition) throws SQLException {
 
-        if (result.contains("confirmation")) {
+        if (result.contains("confirmation") || scid.equals("fake")) {
             return;
         }
         String sqlCommand = "INSERT INTO sends VALUES ('" + card + "','" + port + "','" + result + "','" + smsLength +
-                "','" + pos + "');";
-        //System.out.println("sqlCommand = " + sqlCommand);
+                "','" + scid + "','" + simPosition + "');";
+
         stmt.addBatch(sqlCommand);
 
     }
@@ -131,12 +105,39 @@ public class DatabaseOperation {
         return recordsCount;
     }
 
-    public int sendDBQueries(String sqlCommand) throws SQLException {
+    public int sendDBQueries(String sqlCommand) {
 
+        int results;
 
-        rs = stmt.executeQuery(sqlCommand);
-        int results = rs.getInt(1);
+        try {
+            rs = stmt.executeQuery(sqlCommand);
+            results = rs.getInt(2);
+
+        } catch (SQLException e) {
+            return 0;
+        }
 
         return results;
+
+    }
+
+    public String sendDBQueries2(String sqlCommand) {
+
+        String simID;
+
+        try {
+            rs = stmt.executeQuery(sqlCommand);
+            simID = rs.getString(1);
+        } catch (SQLException e) {
+            return "unknown";
+        }
+
+        return simID;
+    }
+
+    public void closeConnection() throws SQLException {
+
+        conn.close();
+
     }
 }
