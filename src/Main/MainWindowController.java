@@ -23,23 +23,6 @@ public class MainWindowController {
     private Label totalSmsSentLabel;
     @FXML
     private TextArea area1;
-    @FXML
-    private TextArea area2;
-    @FXML
-    private TextArea area3;
-    @FXML
-    private TextArea area4;
-    @FXML
-    private TextArea area5;
-    @FXML
-    private TextArea area6;
-    @FXML
-    private TextArea area7;
-    @FXML
-    private TextArea area8;
-
-    TextArea[] area = {area1, area2, area3, area4, area5, area6, area7, area8};
-    int[] values = new int[128];
 
     @FXML
     private void browseToFile() {
@@ -72,12 +55,14 @@ public class MainWindowController {
     private void retrieveMinutesUsed() throws SQLException {
 
         DatabaseOperation operation = new DatabaseOperation();
-        int resultCount = 0;
-        int results = 0;
+
+        int results;
 
         for (int card = 21; card <= 28; card++) {
 
             for (int port = 1; port <= 4; port++) {
+
+                area1.appendText("\n");
 
                 for (int pos = 1; pos <= 4; pos++) {
 
@@ -87,25 +72,11 @@ public class MainWindowController {
                     results = operation.sendDBQueries(sqlCommand);
 
                     totalSmsSent += results;
-                    //System.out.println(card + "/" + port + "/" + pos + " [count = " + results + "]");
-
-
-                    values[resultCount] = results;
-                    resultCount++;
+                    area1.appendText(card + " / " + port + " / " + pos + " - [count = " + results + "]\n");
 
                 }
             }
         }
-        sendToTextAreas();
         totalSmsSentLabel.setText(String.valueOf(totalSmsSent));
-    }
-
-    private void sendToTextAreas() {
-
-        for (int i = 0; i < values.length; i++) {
-            System.out.println(values[i]);
-        }
-
-
     }
 }
